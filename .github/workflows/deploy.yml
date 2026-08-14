@@ -1,0 +1,40 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Load deployment secrets
+        uses: 1password/load-secrets-action@v5
+        with:
+          export-env: true
+        env:
+          OP_WORKLOAD_ID: "472SPN7QOFA2ZMPSWI6R727KHU"
+          OP_ENVIRONMENT_ID: "euxxlx4hif62y7chldpdgmubzy"
+          OP_INTEGRATION_KEY: ${{ secrets.OP_INTEGRATION_KEY }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel project settings
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Build for Vercel
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy to Vercel
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
