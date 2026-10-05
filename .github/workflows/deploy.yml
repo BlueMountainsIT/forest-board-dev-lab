@@ -31,7 +31,13 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel project settings
-        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+        run: |
+          rm -rf .vercel
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          test -f .vercel/project.json
+        env:
+          VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_ID }}
 
       - name: Sync secrets to Vercel
         run: |
@@ -40,13 +46,25 @@ jobs:
           done
           PROD_URL="${{ vars.PRODUCTION_URL }}"
           if [ -z "$PROD_URL" ]; then
-            echo "Set repository variable PRODUCTION_URL to your Vercel app URL (e.g. https://forest-board-dev-lab.vercel.app)"
+            PROD_URL="$AUTH0_BASE_URL"
+          fi
+          if [ -z "$PROD_URL" ] || [ "$PROD_URL" = "http://localhost:3000" ]; then
+            echo "Set GitHub variable PRODUCTION_URL to your Vercel app URL, or set AUTH0_BASE_URL in 1Password to that URL."
             exit 1
           fi
           printf "%s" "$PROD_URL" | vercel env add AUTH0_BASE_URL production --force --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_ID }}
 
       - name: Build for Vercel
         run: vercel build --prod --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_ID }}
 
       - name: Deploy to Vercel
         run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_ID }}
