@@ -22,8 +22,8 @@ jobs:
         with:
           export-env: true
         env:
-          OP_WORKLOAD_ID: "<your-workload-id>"
-          OP_ENVIRONMENT_ID: "<your-environment-id>"
+          OP_WORKLOAD_ID: "3OTQQJ7ZJJFQBMNRY2RDHVGJBI"
+          OP_ENVIRONMENT_ID: "euxxlx4hif62y7chldpdgmubzy"
           OP_INTEGRATION_KEY: ${{ secrets.OP_INTEGRATION_KEY }}
 
       - name: Install dependencies
