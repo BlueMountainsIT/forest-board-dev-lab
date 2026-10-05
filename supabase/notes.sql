@@ -1,5 +1,5 @@
 -- Dev Lab: notes table
--- Run this in the Supabase SQL Editor during Session 2.
+-- Run this in the Supabase SQL Editor at the start of Session 2.
 
 create table if not exists notes (
   id         bigint generated always as identity primary key,
@@ -8,7 +8,7 @@ create table if not exists notes (
   created_at timestamptz not null default now()
 );
 
--- Allow anonymous reads and writes for now (we add Auth0 login in Session 3).
+-- Allow anonymous reads and writes for now (Auth0 login arrives in Session 3).
 alter table notes enable row level security;
 
 create policy "Anyone can read notes"
