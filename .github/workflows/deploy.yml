@@ -48,6 +48,7 @@ jobs:
           if [ -z "$PROD_URL" ]; then
             PROD_URL="$AUTH0_BASE_URL"
           fi
+          PROD_URL="${PROD_URL%/}"
           if [ -z "$PROD_URL" ] || [ "$PROD_URL" = "http://localhost:3000" ]; then
             echo "Set GitHub variable PRODUCTION_URL to your Vercel app URL, or set AUTH0_BASE_URL in 1Password to that URL."
             exit 1
