@@ -4,21 +4,20 @@ on:
   push:
     branches: [main]
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - name: Check out code
         uses: actions/checkout@v4
 
-      # IDs must match 1Password → Dev Lab Environment → Destinations → GitHub Actions.
-      # Do not "Re-run failed jobs" on an old run — that reuses the old commit.
-      # Open the run triggered by the latest push to main instead.
+      # IDs must come from Dev Lab Environment → Destinations → GitHub Actions (not another project).
       - name: Load secrets from 1Password
-        uses: 1password/load-secrets-action@v5
+        uses: 1Password/load-secrets-action@v5beta
         with:
           export-env: true
         env:
@@ -34,18 +33,21 @@ jobs:
 
       - name: Pull Vercel project settings
         run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-        env:
-          VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_ID }}
+
+      - name: Sync secrets to Vercel
+        run: |
+          for var in SUPABASE_URL SUPABASE_ANON_KEY AUTH0_SECRET AUTH0_ISSUER_BASE_URL AUTH0_CLIENT_ID AUTH0_CLIENT_SECRET; do
+            printf "%s" "${!var}" | vercel env add "$var" production --force --token="$VERCEL_TOKEN"
+          done
+          PROD_URL="${{ vars.PRODUCTION_URL }}"
+          if [ -z "$PROD_URL" ]; then
+            echo "Set repository variable PRODUCTION_URL to your Vercel app URL (e.g. https://forest-board-dev-lab.vercel.app)"
+            exit 1
+          fi
+          printf "%s" "$PROD_URL" | vercel env add AUTH0_BASE_URL production --force --token="$VERCEL_TOKEN"
 
       - name: Build for Vercel
         run: vercel build --prod --token="$VERCEL_TOKEN"
-        env:
-          VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_ID }}
 
       - name: Deploy to Vercel
         run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
-        env:
-          VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_ID }}
