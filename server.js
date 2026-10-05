@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const { renderPage } = require('./lib/render');
+const { getAuthConfig, requireAuthIfEnabled } = require('./lib/auth');
 const {
   getSupabaseConfig,
   checkConnection,
@@ -12,6 +13,16 @@ const {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const authConfig = getAuthConfig();
+
+if (!authConfig.enabled) {
+  console.warn(
+    'Auth0 is not fully configured yet. Missing:',
+    authConfig.missing.join(', ')
+  );
+} else {
+  app.use(authConfig.middleware);
+}
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -33,12 +44,16 @@ async function loadPageData() {
   return { connected: true, notes };
 }
 
-function renderHomePage(res, options = {}) {
+function renderHomePage(req, res, options = {}) {
+  const user = req.oidc?.user ?? null;
+
   return loadPageData()
     .then(({ connected, notes }) => {
       const page = renderPage({
         connected,
         notes,
+        authEnabled: authConfig.enabled,
+        user,
         flash: options.flash,
       });
       res.type('html').send(page);
@@ -48,19 +63,22 @@ function renderHomePage(res, options = {}) {
       const page = renderPage({
         connected: false,
         notes: [],
+        authEnabled: authConfig.enabled,
+        user,
         flash: options.flash,
       });
       res.type('html').send(page);
     });
 }
 
-app.get('/', async (_req, res) => {
-  await renderHomePage(res);
+app.get('/', async (req, res) => {
+  await renderHomePage(req, res);
 });
 
-app.post('/notes', async (req, res) => {
+app.post('/notes', requireAuthIfEnabled(authConfig.enabled), async (req, res) => {
   const name = String(req.body.name || '').trim();
   const message = String(req.body.message || '').trim();
+  const user = req.oidc?.user ?? null;
 
   if (!name || !message) {
     const { connected, notes } = await loadPageData();
@@ -71,6 +89,8 @@ app.post('/notes', async (req, res) => {
         renderPage({
           connected,
           notes,
+          authEnabled: authConfig.enabled,
+          user,
           flash: { type: 'error', message: 'Please enter both a name and a message.' },
         })
       );
@@ -82,6 +102,8 @@ app.post('/notes', async (req, res) => {
     const page = renderPage({
       connected: false,
       notes: [],
+      authEnabled: authConfig.enabled,
+      user,
       flash: {
         type: 'error',
         message: 'Database is not connected yet. Finish Session 2 setup first.',
@@ -96,6 +118,8 @@ app.post('/notes', async (req, res) => {
     const page = renderPage({
       connected: false,
       notes: [],
+      authEnabled: authConfig.enabled,
+      user,
       flash: {
         type: 'error',
         message: 'Database is not connected yet. Finish Session 2 setup first.',
@@ -113,6 +137,8 @@ app.post('/notes', async (req, res) => {
     const page = renderPage({
       connected: true,
       notes,
+      authEnabled: authConfig.enabled,
+      user,
       flash: { type: 'error', message: 'Could not save your note. Please try again.' },
     });
     return res.status(500).type('html').send(page);
