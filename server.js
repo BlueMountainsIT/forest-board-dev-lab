@@ -119,6 +119,10 @@ app.post('/notes', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Dev Lab is running at http://localhost:${PORT}`);
-});
+module.exports = app;
+
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Dev Lab is running at http://localhost:${PORT}`);
+  });
+}

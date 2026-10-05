@@ -15,13 +15,15 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Load deployment secrets
+      # Paste OP_WORKLOAD_ID and OP_ENVIRONMENT_ID from 1Password:
+      # Dev Lab Environment → Destinations → GitHub Actions → copy workflow snippet
+      - name: Load secrets from 1Password
         uses: 1password/load-secrets-action@v5
         with:
           export-env: true
         env:
-          OP_WORKLOAD_ID: "472SPN7QOFA2ZMPSWI6R727KHU"
-          OP_ENVIRONMENT_ID: "euxxlx4hif62y7chldpdgmubzy"
+          OP_WORKLOAD_ID: "<your-workload-id>"
+          OP_ENVIRONMENT_ID: "<your-environment-id>"
           OP_INTEGRATION_KEY: ${{ secrets.OP_INTEGRATION_KEY }}
 
       - name: Install dependencies
@@ -32,9 +34,18 @@ jobs:
 
       - name: Pull Vercel project settings
         run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_ID }}
 
       - name: Build for Vercel
         run: vercel build --prod --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_ID }}
 
       - name: Deploy to Vercel
         run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_ID }}
