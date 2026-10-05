@@ -15,13 +15,12 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      # IDs must come from Dev Lab Environment → Destinations → GitHub Actions (not another project).
       - name: Load secrets from 1Password
-        uses: 1Password/load-secrets-action@v5beta
+        uses: 1Password/load-secrets-action@v5
         with:
           export-env: true
         env:
-          OP_WORKLOAD_ID: "3OTQQJ7ZJJFQBMNRY2RDHVGJBI"
+          OP_WORKLOAD_ID: "IDWOHIKHKBBTNAXWZ7OYDDDQX4"
           OP_ENVIRONMENT_ID: "euxxlx4hif62y7chldpdgmubzy"
           OP_INTEGRATION_KEY: ${{ secrets.OP_INTEGRATION_KEY }}
 
