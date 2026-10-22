@@ -65,8 +65,103 @@ body::before {
   background-size: 120px 120px, 160px 160px, 200px 200px;
 }
 
+.pumpkin-patch {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.pumpkin {
+  position: absolute;
+  line-height: 1;
+  opacity: 0.42;
+  filter: drop-shadow(0 6px 14px rgba(26, 18, 10, 0.45));
+  animation: pumpkin-sway 7s ease-in-out infinite;
+}
+
+.pumpkin--1 {
+  top: 6%;
+  left: 3%;
+  font-size: 2.4rem;
+  --pumpkin-tilt: -14deg;
+  animation-delay: -1s;
+}
+
+.pumpkin--2 {
+  top: 18%;
+  right: 5%;
+  font-size: 1.85rem;
+  --pumpkin-tilt: 10deg;
+  animation-delay: -2.5s;
+}
+
+.pumpkin--3 {
+  top: 42%;
+  left: 1%;
+  font-size: 3rem;
+  --pumpkin-tilt: 6deg;
+  opacity: 0.32;
+  animation-delay: -0.5s;
+}
+
+.pumpkin--4 {
+  top: 58%;
+  right: 2%;
+  font-size: 2.75rem;
+  --pumpkin-tilt: -8deg;
+  animation-delay: -3s;
+}
+
+.pumpkin--5 {
+  bottom: 12%;
+  left: 8%;
+  font-size: 2.1rem;
+  --pumpkin-tilt: 12deg;
+  animation-delay: -4s;
+}
+
+.pumpkin--6 {
+  bottom: 8%;
+  right: 10%;
+  font-size: 2.55rem;
+  --pumpkin-tilt: -5deg;
+  animation-delay: -1.8s;
+}
+
+.pumpkin--7 {
+  top: 72%;
+  left: 14%;
+  font-size: 1.65rem;
+  --pumpkin-tilt: -18deg;
+  opacity: 0.28;
+  animation-delay: -2.2s;
+}
+
+.pumpkin--8 {
+  top: 28%;
+  right: 16%;
+  font-size: 1.5rem;
+  --pumpkin-tilt: 16deg;
+  opacity: 0.3;
+  animation-delay: -5s;
+}
+
+@keyframes pumpkin-sway {
+  0%,
+  100% {
+    transform: rotate(var(--pumpkin-tilt, 0deg)) translateY(0);
+  }
+
+  50% {
+    transform: rotate(calc(var(--pumpkin-tilt, 0deg) + 4deg)) translateY(-4px);
+  }
+}
+
 .page {
   position: relative;
+  z-index: 1;
   width: min(920px, calc(100% - 2rem));
   margin: 0 auto;
   padding: 2rem 0 3rem;
@@ -92,7 +187,16 @@ body::before {
   align-items: center;
   gap: 0.55rem;
   margin-bottom: 0.35rem;
-  font-size: 1.35rem;
+  font-size: 1.55rem;
+  letter-spacing: 0.08em;
+}
+
+.note-card::before {
+  content: '🎃';
+  float: right;
+  margin-left: 0.5rem;
+  font-size: 1.1rem;
+  opacity: 0.55;
 }
 
 .eyebrow {
@@ -355,5 +459,17 @@ button:not(:disabled):hover {
 @media (max-width: 720px) {
   .site-header {
     flex-direction: column;
+  }
+
+  .pumpkin-patch .pumpkin {
+    opacity: 0.22;
+    font-size: 1.35rem !important;
+  }
+
+  .pumpkin--3,
+  .pumpkin--4,
+  .pumpkin--7,
+  .pumpkin--8 {
+    display: none;
   }
 }
